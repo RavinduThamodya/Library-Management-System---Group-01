@@ -2,6 +2,7 @@
 
 Description of Project Files
 Below are the project files you will get once you download and extract the Library project:
+
 •	main.py – which does function call to all other python files
 •	AddBook.py – To add the book
 •	ViewBooks.py – To View the list of books in the library 
