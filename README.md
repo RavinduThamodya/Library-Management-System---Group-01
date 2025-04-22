@@ -2,7 +2,7 @@
 
 A simple console-based Library Management System developed using Python. This project allows users to manage books in a library, including adding, viewing, issuing, returning, and deleting books.
 
-📁 Project Structure
+Project Structure
 Once you download and extract the project, you will find the following files:
 
 File Name	Description
@@ -14,7 +14,6 @@ IssueBook.py	Facilitates issuing a book to a user.
 ReturnBook.py	Handles returning a previously issued book.  
 
 💡 Features
-Add new books with title and author details  
 View all available books  
 Issue books to users  
 Return issued books  
