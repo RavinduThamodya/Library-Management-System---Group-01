@@ -1,4 +1,4 @@
-# Library-Management-System---Group-01
+# Library-Management-System-Group-01
 
 A simple console-based Library Management System developed using Python. This project allows users to manage books in a library, including adding, viewing, issuing, returning, and deleting books.
 
@@ -13,7 +13,7 @@ DeleteBook.py	Enables deletion of a book from the library.
 IssueBook.py	Facilitates issuing a book to a user.  
 ReturnBook.py	Handles returning a previously issued book.  
 
-💡 Features
+Features
 View all available books  
 Issue books to users  
 Return issued books  
