@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">📚 My Reservations</h2>
+
+    {% if reservations %}
+    <div class="row">
+        {% for reservation in reservations %}
+        <div class="col-md-3 mb-4">
+            <div class="card h-100">
+                <!-- Book image or fallback title -->
+                {% if reservation.book.image %}
+                    <img src="{{ reservation.book.image.url }}" class="card-img-top" alt="{{ reservation.book.title }}">
+                {% else %}
+                    <div class="card-img-top d-flex align-items-center justify-content-center bg-light text-muted" style="height: 200px;">
+                        {{ reservation.book.title }}
+                    </div>
+                {% endif %}
+
+                <!-- Book info -->
+                <div class="card-body">
+                    <h5 class="card-title">{{ reservation.book.title }}</h5>
+                    <p class="card-text">
+                        {{ reservation.book.author }} ({{ reservation.book.category }})<br>
+                        <small class="text-muted">Reserved on {{ reservation.reserved_at|date:"Y-m-d H:i" }}</small>
+                    </p>
+                    <a href="{% url 'cancel_reservation' reservation.book.id %}" class="btn btn-danger btn-sm">Cancel Reservation</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">You haven't reserved any books yet.</div>
+    {% endif %}
+</div>
+{% endblock %}
