@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-warning text-center" role="alert">
+        <h4 class="alert-heading">Reservation Failed</h4>
+        <p>Sorry, the book <strong>"{{ book.title }}"</strong> is already reserved by someone else.</p>
+        <hr>
+        <a href="{% url 'home' %}" class="btn btn-primary">🔙 Back to Home</a>
+    </div>
+</div>
+{% endblock %}
