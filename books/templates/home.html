@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Welcome, {{ user.username }} 👋</h2>
+
+    <!-- Search Form -->
+    <form method="GET" action="{% url 'home' %}" class="input-group mb-4">
+        <input type="text" name="q" class="form-control" placeholder="Search by title, author, or category">
+        <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+
+    <!-- Reserved Books Section -->
+    <h3 class="mt-4">Reserved Books</h3>
+    <div class="row">
+        {% for book in reserved_by_user %}
+        <div class="col-md-3 mb-4">
+            <div class="card h-100">
+                {% if book.image %}
+                    <img src="{{ book.image.url }}" class="card-img-top" alt="{{ book.title }}">
+                {% else %}
+                    <div class="card-img-top d-flex align-items-center justify-content-center bg-light text-muted" style="height: 200px;">
+                        {{ book.title }}
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ book.title }}</h5>
+                    <p class="card-text">{{ book.author }} ({{ book.category }})</p>
+                    <a href="{% url 'cancel_reservation' book.id %}" class="btn btn-danger btn-sm">Cancel Reservation</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% for book in reserved_by_others %}
+        <div class="col-md-3 mb-4">
+            <div class="card h-100">
+                {% if book.image %}
+                    <img src="{{ book.image.url }}" class="card-img-top" alt="{{ book.title }}">
+                {% else %}
+                    <div class="card-img-top d-flex align-items-center justify-content-center bg-light text-muted" style="height: 200px;">
+                        {{ book.title }}
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ book.title }}</h5>
+                    <p class="card-text">{{ book.author }} ({{ book.category }})</p>
+                    <span class="badge bg-secondary">Not Available</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if reserved_by_user|length == 0 and reserved_by_others|length == 0 %}
+        <p class="text-muted">No reserved books found.</p>
+    {% endif %}
+
+    <!-- Available Books Section -->
+    <h3 class="mt-5">Available Books</h3>
+    <div class="row">
+        {% for book in available_books %}
+        <div class="col-md-3 mb-4">
+            <div class="card h-100">
+                {% if book.image %}
+                    <img src="{{ book.image.url }}" class="card-img-top" alt="{{ book.title }}">
+                {% else %}
+                    <div class="card-img-top d-flex align-items-center justify-content-center bg-light text-muted" style="height: 200px;">
+                        {{ book.title }}
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ book.title }}</h5>
+                    <p class="card-text">{{ book.author }} ({{ book.category }})</p>
+                    <form action="{% url 'reserve_book' book.id %}" method="POST">
+                        {% csrf_token %}
+                        <button class="btn btn-success btn-sm" type="submit">Reserve</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-muted">No available books at the moment.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
