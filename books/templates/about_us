@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About Us - University of Moratuwa Library</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f2f6fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .about-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-top: 60px;
+        }
+        h1, h3 {
+            color: #003366;
+            font-weight: bold;
+        }
+        p {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #333;
+        }
+        .contact-info {
+            font-size: 20px;
+            color: #0056b3;
+            margin-top: 20px;
+        }
+        .contact-info span {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="about-container">
+        <h1 class="text-center mb-4">About University of Moratuwa Library</h1>
+        <p>
+            The <strong>University of Moratuwa Library</strong> is the heart of academic and research activities at the University of Moratuwa, located in Katubedda, Sri Lanka.
+            It provides a wide range of resources, including books, journals, digital archives, and research papers to support the academic community.
+        </p>
+        <p>
+            The Library offers modern facilities such as study spaces, computer labs, and online access to a variety of databases. Students and researchers
+            benefit from both physical and digital collections, making learning and innovation more accessible and dynamic.
+        </p>
+        <p>
+            Committed to supporting excellence in education and research, the Library continues to upgrade its services and collections to meet the evolving
+            needs of the university community. It plays a vital role in empowering knowledge and fostering academic success.
+        </p>
+
+        <!-- Contact Section -->
+        <h3 class="text-center mt-5">Contact Information</h3>
+        <p class="text-center contact-info">
+            📞 <span>Phone:</span> +94 11 265 0301
+        </p>
+    </div>
+</div>
+
+<!-- Bootstrap JS (Optional for components like modals, dropdowns) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
+</body>
+
+</html>
