@@ -4,10 +4,13 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
-
 from .models import Book, Reservation
-
-
+from django.db.models import Count
+from django.utils import timezone
+from datetime import timedelta
+from .models import Book
+from django.utils.timezone import make_aware
+from datetime import datetime, time
 # =======================
 # Authentication Views
 # =======================
@@ -56,83 +59,152 @@ def logout_view(request):
 
 @login_required
 def home(request):
-    """
-    Displays available and reserved books.
-    Allows filtering by title, author, or category.
-    Separates books reserved by current user and others.
-    """
-    query = request.GET.get('q')
-    books = Book.objects.all()
+    categories = Book.objects.values('category').annotate(book_count=Count('id')).distinct()
+    selected_category = request.GET.get('category')
+    search_query = request.GET.get('q')
 
-    if query:
-        books = books.filter(
-            Q(title__icontains=query) |
-            Q(author__icontains=query) |
-            Q(category__icontains=query)
+    books = []
+
+    # Handle search query
+    if search_query:
+        books = Book.objects.filter(
+            Q(title__icontains=search_query) | Q(author__icontains=search_query)
         )
+    elif selected_category:
+        books = Book.objects.filter(category=selected_category)
 
-    available_books = books.filter(is_reserved=False)
-    reserved_books = books.filter(is_reserved=True)
+    # If both category and search query are present, combine them
+    if selected_category and search_query:
+        books = books.filter(category=selected_category)
 
-    # Get IDs of books reserved by the logged-in user
-    user_reserved_book_ids = Reservation.objects.filter(user=request.user).values_list('book_id', flat=True)
+    # Get trending books this week
+    trending_books_data = trending_books(request)
 
-    reserved_by_user = reserved_books.filter(id__in=user_reserved_book_ids)
-    reserved_by_others = reserved_books.exclude(id__in=user_reserved_book_ids)
-
-    context = {
-        'available_books': available_books,
-        'reserved_by_user': reserved_by_user,
-        'reserved_by_others': reserved_by_others,
-    }
-
-    return render(request, 'home.html', context)
+    return render(request, 'home.html', {
+        'categories': categories,
+        'books': books,
+        'selected_category': selected_category,
+        'search_query': search_query,
+        'trending_books': trending_books_data  # Pass trending books to the template
+    })
 
 
 @login_required
 def my_reservations(request):
-    """Displays books reserved by the current user."""
-    reservations = Reservation.objects.filter(user=request.user).select_related('book')
+    # Assuming you have a ForeignKey relationship with User in the Reservation model
+    reservations = Reservation.objects.filter(user=request.user)  # Filter by the logged-in user
+
+    for reservation in reservations:
+        # Calculate collecting week by adding 7 days to reservation date
+        reservation.collecting_week = reservation.reservation_date + timedelta(days=7)
+
     return render(request, 'my_reservations.html', {'reservations': reservations})
-
-
 # =======================
 # Reservation Views
 # =======================
-
-@login_required
-def reserve_book(request, book_id):
-    """
-    Allows a user to reserve a book if it's not already reserved.
-    Updates book status and shows a success or warning message.
-    """
-    book = get_object_or_404(Book, id=book_id)
-
-    if not book.is_reserved:
-        Reservation.objects.create(user=request.user, book=book)
-        book.is_reserved = True
-        book.save()
-        messages.success(request, f"You have successfully reserved '{book.title}'.")
-    else:
-        messages.warning(request, f"'{book.title}' is not available for reservation.")
-
-    return redirect('home')
 
 
 @login_required
 def cancel_reservation(request, book_id):
     """
     Allows a user to cancel their own reservation.
-    Updates book status and shows a confirmation message.
+    Updates book status, increases available count, and shows a confirmation message.
     """
     reservation = Reservation.objects.filter(book_id=book_id, user=request.user).first()
 
     if reservation:
-        reservation.book.is_reserved = False
-        reservation.book.save()
+        book = reservation.book
+        book.is_reserved = False
+
+
+        book.total_copies += 1
+
+        book.save()
         reservation.delete()
-        messages.info(request, f"You have cancelled your reservation for '{reservation.book.title}'.")
+        messages.info(request, f"You have cancelled your reservation for '{book.title}'.")
     else:
         messages.warning(request, "No reservation found to cancel.")
 
     return redirect('my_reservations')
+
+
+@login_required
+def reserve_book(request, book_id):
+    if request.user.is_authenticated:
+        book = get_object_or_404(Book, id=book_id)
+
+        # Check if the user already reserved this book
+        existing_reservation = Reservation.objects.filter(user=request.user, book=book).first()
+        if existing_reservation:
+            messages.error(request, "You have already reserved this book.")
+            return redirect('home')  # or wherever you want to redirect
+
+        # Check if copies are available
+        if book.total_copies > 0:
+            # Create the reservation
+            reservation = Reservation.objects.create(user=request.user, book=book)
+
+            # Calculate collecting week (1 week after reservation date)
+            collecting_week = reservation.reservation_date + timedelta(weeks=1)
+            print(f"Calculated Collecting Week: {collecting_week}")
+            reservation.collecting_week = collecting_week
+            reservation.save()
+
+
+            # Reduce the available copies of the book
+            book.total_copies -= 1
+            book.save()
+
+            messages.success(request, "Book reserved successfully!")
+        else:
+            messages.error(request, "No copies available for reservation.")
+
+        return redirect('home')  # Redirect back to the home page or other relevant page
+
+
+
+
+def book_detail(request, book_id):
+    # Get the book object for the clicked book
+    book = get_object_or_404(Book, id=book_id)
+
+    # Fetch related books by category or author
+    related_books = Book.objects.filter(
+        category=book.category
+    ).exclude(id=book.id)[:4]  # Exclude the current book and limit to 4 books
+
+    # You could also use author-based filtering or other criteria
+    # related_books = Book.objects.filter(author=book.author).exclude(id=book.id)[:4]
+
+    return render(request, 'book_detail.html', {
+        'book': book,
+        'related_books': related_books
+    })
+
+def about_us(request):
+    return render(request, 'about_us.html')
+
+
+
+def trending_books(request):
+    today = timezone.now().date()
+    start_date = today - timedelta(days=7)
+    end_date = today
+
+    # Convert date range to datetime range
+    start_datetime = make_aware(datetime.combine(start_date, time.min))
+    end_datetime = make_aware(datetime.combine(today, time.max))
+
+    trending_books = (
+        Book.objects
+        .annotate(
+            reservation_count=Count(
+                'reservation',
+                filter=Q(reservation__reservation_date__range=[start_datetime, end_datetime])
+            )
+        )
+        .filter(reservation_count__gt=0)
+        .order_by('-reservation_count')[:4]
+    )
+
+    return trending_books
