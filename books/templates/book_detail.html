@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4" style="background-color: #f9f9f9; padding: 30px; border-radius: 10px;">
+    <div class="row">
+        <!-- Book Image Section -->
+        <div class="col-md-4">
+            {% if book.image %}
+            <img src="{{ book.image.url }}" alt="{{ book.title }}" class="img-fluid rounded shadow-sm" style="border: 1px solid #ccc;">
+            {% else %}
+            <div class="img-fluid rounded shadow-sm" style="height: 300px; background-color: #f0fafa; display: flex; justify-content: center; align-items: center; color: #00796b; font-weight: bold; border: 1px solid #ccc;">No Image Available</div>
+            {% endif %}
+        </div>
+
+        <!-- Book Details Section -->
+        <div class="col-md-8">
+            <h2 class="text-primary" style="color: #00796b; font-weight: 600;">{{ book.title }}</h2>
+            <p class="text-muted" style="font-size: 15px;"><strong>Author:</strong> {{ book.author }}</p>
+            <p class="text-muted" style="font-size: 15px;"><strong>Category:</strong> {{ book.category }}</p>
+            <p class="text-muted" style="font-size: 15px;"><strong>ISBN:</strong> {{ book.isbn }}</p>
+
+            {% if book.description %}
+            <div class="mt-4">
+                <h5 class="text-secondary" style="color: #666;">Description</h5>
+                <p style="color: #333;">{{ book.description }}</p>
+            </div>
+            {% endif %}
+
+            <p class="text-muted" style="font-size: 15px;"><strong>Available Copies:</strong> {{ book.total_copies }}</p>
+
+            <!-- Reserve Button -->
+            <div class="mt-4">
+                <form action="{% url 'reserve_book' book.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success" style="background-color: #00796b; border: none; font-size: 16px; font-weight: 500; border-radius: 5px; padding: 10px 20px; transition: background-color 0.3s;">
+                        Reserve This Book
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Books Section -->
+    <div class="mt-5">
+        <h3 class="text-center" style="color: #00796b; font-weight: 600;">Related Books</h3>
+        <div class="row">
+            {% for related_book in related_books %}
+            <div class="col-md-3 mb-4">
+                <div class="card" style="border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    <img src="{{ related_book.image.url }}" alt="{{ related_book.title }}" class="card-img-top" style="border-radius: 10px; height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title" style="color: #00796b;">{{ related_book.title }}</h5>
+                        <p class="card-text" style="font-size: 14px; color: #555;">{{ related_book.author }}</p>
+                        <a href="{% url 'book_detail' related_book.id %}" class="btn btn-outline-primary" style="font-size: 14px;">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Go Back Button -->
+    <div class="mt-4" style="text-align: center;">
+        <a href="{% url 'home' %}" class="btn btn-secondary" style="background-color: #607d8b; color: white; padding: 10px 20px; border-radius: 5px; font-weight: 500; font-size: 16px;">Go Back to Home</a>
+    </div>
+</div>
+{% endblock %}
