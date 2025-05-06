@@ -32,6 +32,8 @@
         </div>
         {% endfor %}
 
+
+        
         {% for book in reserved_by_others %}
         <div class="col-md-3 mb-4">
             <div class="card h-100">
@@ -52,6 +54,8 @@
         {% endfor %}
     </div>
 
+
+    
     {% if reserved_by_user|length == 0 and reserved_by_others|length == 0 %}
         <p class="text-muted">No reserved books found.</p>
     {% endif %}
