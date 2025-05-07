@@ -15,12 +15,11 @@ from datetime import datetime, time
 # Authentication Views
 # =======================
 
-#landing page view
 def landing_page(request):
     """Public landing page."""
     return render(request, 'landing.html')
 
-#register view
+
 def register(request):
     """Handles user registration."""
     if request.method == "POST":
@@ -33,7 +32,7 @@ def register(request):
         form = UserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
 
-#log in view
+
 def login_view(request):
     """Handles user login."""
     if request.method == "POST":
@@ -58,7 +57,6 @@ def logout_view(request):
 # Book Views
 # =======================
 
-#Home page view
 @login_required
 def home(request):
     categories = Book.objects.values('category').annotate(book_count=Count('id')).distinct()
@@ -90,7 +88,7 @@ def home(request):
         'trending_books': trending_books_data  # Pass trending books to the template
     })
 
-#my reservations list
+
 @login_required
 def my_reservations(request):
     # Assuming you have a ForeignKey relationship with User in the Reservation model
@@ -105,7 +103,7 @@ def my_reservations(request):
 # Reservation Views
 # =======================
 
-#cancel reservations
+
 @login_required
 def cancel_reservation(request, book_id):
     """
@@ -129,7 +127,7 @@ def cancel_reservation(request, book_id):
 
     return redirect('my_reservations')
 
-#reserve books
+
 @login_required
 def reserve_book(request, book_id):
     if request.user.is_authenticated:
@@ -165,7 +163,7 @@ def reserve_book(request, book_id):
 
 
 
-#fetch book details 
+
 def book_detail(request, book_id):
     # Get the book object for the clicked book
     book = get_object_or_404(Book, id=book_id)
@@ -183,12 +181,11 @@ def book_detail(request, book_id):
         'related_books': related_books
     })
 
-#about us webpage
 def about_us(request):
     return render(request, 'about_us.html')
 
 
-#show trending books for the week
+
 def trending_books(request):
     today = timezone.now().date()
     start_date = today - timedelta(days=7)
